@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Mic, Image as ImageIcon, Calendar, Briefcase,
-  Building2, LogOut, Download, Plus, Trash2, Save, Settings,
+  Building2, LogOut, Download, Plus, Trash2, Save, Settings, Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "registrations" | "sessions" | "speakers" | "gallery" | "sponsors" | "careers" | "settings";
+type Tab = "dashboard" | "registrations" | "sessions" | "speakers" | "achievements" | "gallery" | "sponsors" | "careers" | "settings";
 
 function AdminPage() {
   const { t } = useLang();
@@ -50,6 +50,7 @@ function AdminPage() {
     { id: "registrations", label: t("التسجيلات", "Registrations"), Icon: Users },
     { id: "sessions", label: t("الجدول", "Sessions"), Icon: Calendar },
     { id: "speakers", label: t("المتحدثون", "Speakers"), Icon: Mic },
+    { id: "achievements", label: t("الإنجازات", "Achievements"), Icon: Trophy },
     { id: "gallery", label: t("معرض الصور", "Gallery"), Icon: ImageIcon },
     { id: "sponsors", label: t("الرعاة", "Sponsors"), Icon: Building2 },
     { id: "careers", label: t("الوظائف", "Careers"), Icon: Briefcase },
@@ -87,6 +88,7 @@ function AdminPage() {
         {tab === "registrations" && <Registrations />}
         {tab === "sessions" && <SessionsAdmin />}
         {tab === "speakers" && <SpeakersAdmin />}
+        {tab === "achievements" && <AchievementsAdmin />}
         {tab === "gallery" && <GalleryAdmin />}
         {tab === "sponsors" && <SponsorsAdmin />}
         {tab === "careers" && <CareersAdmin />}
