@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Mic, Image as ImageIcon, Calendar, Briefcase,
-  Building2, LogOut, Download, Plus, Trash2, Save, Settings,
+  Building2, LogOut, Download, Plus, Trash2, Save, Settings, Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "registrations" | "sessions" | "speakers" | "gallery" | "sponsors" | "careers" | "settings";
+type Tab = "dashboard" | "registrations" | "sessions" | "speakers" | "achievements" | "gallery" | "sponsors" | "careers" | "settings";
 
 function AdminPage() {
   const { t } = useLang();
@@ -50,6 +50,7 @@ function AdminPage() {
     { id: "registrations", label: t("التسجيلات", "Registrations"), Icon: Users },
     { id: "sessions", label: t("الجدول", "Sessions"), Icon: Calendar },
     { id: "speakers", label: t("المتحدثون", "Speakers"), Icon: Mic },
+    { id: "achievements", label: t("الإنجازات", "Achievements"), Icon: Trophy },
     { id: "gallery", label: t("معرض الصور", "Gallery"), Icon: ImageIcon },
     { id: "sponsors", label: t("الرعاة", "Sponsors"), Icon: Building2 },
     { id: "careers", label: t("الوظائف", "Careers"), Icon: Briefcase },
@@ -87,6 +88,7 @@ function AdminPage() {
         {tab === "registrations" && <Registrations />}
         {tab === "sessions" && <SessionsAdmin />}
         {tab === "speakers" && <SpeakersAdmin />}
+        {tab === "achievements" && <AchievementsAdmin />}
         {tab === "gallery" && <GalleryAdmin />}
         {tab === "sponsors" && <SponsorsAdmin />}
         {tab === "careers" && <CareersAdmin />}
@@ -595,6 +597,52 @@ function SettingsAdmin() {
           </div>
           <Btn onClick={save}><Save className="h-4 w-4" /> {t("حفظ", "Save")}</Btn>
         </div>
+      </Card>
+    </>
+  );
+}
+
+/* ---------- Achievements ---------- */
+function AchievementsAdmin() {
+  const { t } = useLang();
+  const { rows, save, remove } = useCrud("achievements");
+  const blank = { label_ar: "", label_en: "", value: "", icon: "Trophy", order_index: 0 };
+  const [draft, setDraft] = useState<any>(blank);
+
+  return (
+    <>
+      <H1>{t("الإنجازات", "Achievements")}</H1>
+      <Card className="p-5 mb-6">
+        <div className="grid grid-cols-2 gap-3">
+          <Input placeholder="القيمة (مثل 31+)" value={draft.value} onChange={(e) => setDraft({ ...draft, value: e.target.value })} />
+          <Input placeholder="Icon (Trophy, GraduationCap, Award, Briefcase, TrendingUp, Building2, Users, Sparkles)" value={draft.icon ?? ""} onChange={(e) => setDraft({ ...draft, icon: e.target.value })} />
+          <Input placeholder="الوصف عربي" value={draft.label_ar} onChange={(e) => setDraft({ ...draft, label_ar: e.target.value })} />
+          <Input placeholder="Label (EN)" value={draft.label_en} onChange={(e) => setDraft({ ...draft, label_en: e.target.value })} />
+          <Input type="number" placeholder="Order" value={draft.order_index} onChange={(e) => setDraft({ ...draft, order_index: +e.target.value })} />
+        </div>
+        <div className="mt-3 flex gap-2">
+          <Btn onClick={async () => { await save(draft); setDraft(blank); }}><Save className="h-4 w-4" /> {draft.id ? t("تحديث", "Update") : t("إضافة", "Add")}</Btn>
+          {draft.id && <Btn variant="ghost" onClick={() => setDraft(blank)}>{t("إلغاء", "Cancel")}</Btn>}
+        </div>
+      </Card>
+      <Card className="p-5">
+        <table className="w-full text-sm">
+          <thead className="text-left text-slate-500 border-b"><tr><th className="py-2">Value</th><th>AR</th><th>EN</th><th>Icon</th><th></th></tr></thead>
+          <tbody>
+            {rows.map((r: any) => (
+              <tr key={r.id} className="border-b last:border-0">
+                <td className="py-2 font-bold">{r.value}</td>
+                <td>{r.label_ar}</td>
+                <td>{r.label_en}</td>
+                <td className="text-xs text-slate-500">{r.icon}</td>
+                <td className="flex gap-2 py-2">
+                  <button onClick={() => setDraft(r)} className="text-blue-600 text-xs font-bold">Edit</button>
+                  <button onClick={() => remove(r.id)} className="text-red-600"><Trash2 className="h-4 w-4" /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Card>
     </>
   );

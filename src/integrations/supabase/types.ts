@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          label_ar: string
+          label_en: string
+          order_index: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          label_ar: string
+          label_en: string
+          order_index?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          label_ar?: string
+          label_en?: string
+          order_index?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       careers: {
         Row: {
           after_ai_ar: string | null

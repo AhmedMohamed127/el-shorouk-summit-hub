@@ -1,28 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar, Clock, MapPin, Sparkles, Brain, Briefcase, TrendingUp, Code2,
   Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft,
   Linkedin, Twitter, Mail, Phone, Facebook, Instagram, Globe, Languages,
+  Building2,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import shoroukLogo from "@/assets/shorouk-logo.png.asset.json";
+import bisLogo from "@/assets/bis-logo.jpeg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "الملتقى العلمي لنظم معلومات الأعمال — أكاديمية الشروق" },
-      { name: "description", content: "كيف يغير الذكاء الاصطناعي وظائف وتخصصات BIS؟ ملتقى علمي بقسم BIS بأكاديمية الشروق." },
+      { name: "description", content: "ملتقى علمي بقسم BIS بأكاديمية الشروق — مستقبل وظائف نظم معلومات الأعمال في عصر الذكاء الاصطناعي." },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
   component: Home,
 });
+
+const ICONS: Record<string, any> = { Trophy, GraduationCap, Award, Sparkles, Briefcase, TrendingUp, Building2, Users };
+
+function useRealtime(table: string) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel(`public-${table}`)
+      .on("postgres_changes", { event: "*", schema: "public", table }, () => {
+        qc.invalidateQueries({ queryKey: [table] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [table, qc]);
+}
+
+function useTable<T = any>(table: string) {
+  useRealtime(table);
+  const { data } = useQuery({
+    queryKey: [table],
+    queryFn: async () => {
+      const { data } = await supabase.from(table as any).select("*").order("order_index", { ascending: true });
+      return (data as T[]) ?? [];
+    },
+  });
+  return data ?? [];
+}
 
 /* -------------- Reusable bits -------------- */
 
@@ -100,9 +129,9 @@ function Hero() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          src={shoroukLogo.url}
-          alt="أكاديمية الشروق"
-          className="mb-8 h-20 w-auto rounded-lg bg-white/95 p-2 shadow-elevated md:h-24"
+          src={bisLogo.url}
+          alt="BIS — أكاديمية الشروق"
+          className="mb-8 h-36 w-auto md:h-44 drop-shadow-2xl"
         />
 
         <motion.span
@@ -121,15 +150,6 @@ function Hero() {
           <span className="text-gradient-gold">{t("معلومات الأعمال", "Business Information Systems")}</span>
         </motion.h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.7 }}
-          className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl"
-        >
-          {t(
-            "كيف يغير الذكاء الاصطناعي وظائف وتخصصات BIS؟",
-            "How is AI reshaping the careers and disciplines of BIS?",
-          )}
-        </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.7 }}
@@ -230,41 +250,29 @@ function WhyMatters() {
 
 function Timeline() {
   const { t } = useLang();
-  const sessions = [
-    { time: "10:30 — 10:55", ar_t: "الاستقبال وتجهيز القاعة", en_t: "Reception & hall setup", ar_d: "تسجيل الحضور وتشغيل شاشة الترحيب.", en_d: "Attendee check-in and welcome screen.", speaker: t("فريق التنظيم", "Organizing team") },
-    { time: "11:00 — 11:05", ar_t: "الافتتاح والترحيب", en_t: "Opening & welcome", ar_d: "تعريف بعنوان الملتقى ومسار اليوم.", en_d: "Event introduction and agenda overview.", speaker: t("مقدم الملتقى", "Host") },
-    { time: "11:10 — 11:25", ar_t: "إنجازات المعهد وقسم BIS", en_t: "Institute & BIS achievements", ar_d: "عرض موجز لأبرز إنجازات الأكاديمية والقسم.", en_d: "Highlights from the academy and department.", speaker: t("ممثل الإدارة", "Administration") },
-    { time: "11:30 — 11:50", ar_t: "أثر AI على وظائف BIS", en_t: "AI's impact on BIS careers", ar_d: "شرح عملي للوظائف قبل وبعد AI والمهارات المطلوبة.", en_d: "BIS careers before/after AI and required skills.", speaker: t("الدكتور", "Lead Speaker") },
-    { time: "11:55 — 12:05", ar_t: "استراحة قصيرة", en_t: "Short break", ar_d: "مشروبات وتجهيز فرق المناظرة.", en_d: "Refreshments and debate team prep.", speaker: t("الضيافة", "Hospitality") },
-    { time: "12:10 — 12:35", ar_t: "مناظرات الطلاب مع الدكتور", en_t: "Student debates with the professor", ar_d: "هل يستبدل AI وظائف BIS أم يصنع فرصًا أفضل؟", en_d: "Will AI replace BIS roles or create better opportunities?", speaker: t("فريقا طلاب + الدكتور", "Two student teams + professor") },
-    { time: "12:40 — 12:50", ar_t: "أسئلة مفتوحة", en_t: "Open Q&A", ar_d: "أسئلة وتدخلات من الجمهور.", en_d: "Questions and audience contributions.", speaker: t("الدكتور والمقدم", "Speaker & host") },
-    { time: "12:55 — 1:00", ar_t: "التوصيات والصورة الجماعية", en_t: "Recommendations & group photo", ar_d: "تلخيص الرسائل الأساسية وشكر الحضور.", en_d: "Wrap-up, thanks, and group photo.", speaker: t("الفريق", "All") },
-  ];
-
+  const sessions = useTable("sessions");
   return (
     <Section id="timeline" className="bg-background">
       <SectionHeader eyebrow={t("الجدول الزمني", "Schedule")} title={t("خطة اليوم بالدقائق", "Minute-by-minute agenda")} />
       <div className="relative mx-auto max-w-4xl">
         <div className="absolute bottom-0 top-0 start-6 w-px bg-gradient-to-b from-gold via-gold/30 to-transparent md:start-1/2 md:-ms-px" />
-        {sessions.map((s, i) => (
+        {sessions.map((s: any, i: number) => (
           <motion.div
-            key={i}
+            key={s.id}
             initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5 }}
             className={`relative mb-10 md:w-1/2 ${i % 2 === 0 ? "md:pe-12" : "md:ms-auto md:ps-12"}`}
           >
-            <div className="absolute top-6 start-6 -ms-2 h-4 w-4 rounded-full bg-gold ring-4 ring-background md:start-auto md:end-0 md:-me-2"
-              style={i % 2 !== 0 ? { left: "auto", insetInlineStart: "-0.5rem", insetInlineEnd: "auto" } : undefined}
-            />
+            <div className="absolute top-6 start-6 -ms-2 h-4 w-4 rounded-full bg-gold ring-4 ring-background md:start-auto md:end-0 md:-me-2" />
             <div className="ms-12 rounded-2xl border bg-card p-6 shadow-elevated md:ms-0">
               <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-navy-deep px-3 py-1 text-xs font-bold text-gold">
-                <Clock className="h-3 w-3" /> {s.time}
+                <Clock className="h-3 w-3" /> {s.time_label}
               </div>
-              <h3 className="text-lg font-bold text-navy-deep">{t(s.ar_t, s.en_t)}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{t(s.ar_d, s.en_d)}</p>
-              <p className="mt-3 text-xs font-semibold text-gold">— {s.speaker}</p>
+              <h3 className="text-lg font-bold text-navy-deep">{t(s.title_ar, s.title_en)}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{t(s.description_ar, s.description_en)}</p>
+              {s.speaker && <p className="mt-3 text-xs font-semibold text-gold">— {s.speaker}</p>}
             </div>
           </motion.div>
         ))}
@@ -275,12 +283,7 @@ function Timeline() {
 
 function Achievements() {
   const { t } = useLang();
-  const stats = [
-    { Icon: Trophy, value: "120+", ar_l: "مشروع طلابي", en_l: "Student projects" },
-    { Icon: GraduationCap, value: "800+", ar_l: "طالب وطالبة", en_l: "Students" },
-    { Icon: Award, value: "25+", ar_l: "برنامج تدريبي", en_l: "Training programs" },
-    { Icon: Sparkles, value: "60+", ar_l: "قصة نجاح", en_l: "Success stories" },
-  ];
+  const stats = useTable("achievements");
   return (
     <section className="relative overflow-hidden bg-navy-deep py-20 text-white md:py-28">
       <div className="absolute inset-0 opacity-20" style={{
@@ -291,21 +294,25 @@ function Achievements() {
           <span className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-gold">
             <Trophy className="h-3.5 w-3.5" /> {t("الإنجازات", "Achievements")}
           </span>
-          <h2 className="mt-5 text-3xl font-black md:text-5xl">{t("أرقام تتحدث عن القسم", "Numbers that speak for the department")}</h2>
+          <h2 className="mt-5 text-3xl font-black md:text-5xl">{t("إنجازات أكاديمية الشروق منذ 2008", "Shorouk Academy achievements since 2008")}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-white/60 md:text-base">{t("معدلات موثوقة تعكس مسيرة القسم والأكاديمية في تخريج كفاءات سوق العمل.", "Reliable rates reflecting the department and academy's track record in producing market-ready talent.")}</p>
         </div>
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-          {stats.map((s, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="rounded-2xl glass-card p-6 text-center"
-            >
-              <s.Icon className="mx-auto mb-3 h-8 w-8 text-gold" />
-              <div className="text-4xl font-black text-gradient-gold md:text-5xl">{s.value}</div>
-              <div className="mt-2 text-sm text-white/70">{t(s.ar_l, s.en_l)}</div>
-            </motion.div>
-          ))}
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+          {stats.map((s: any, i: number) => {
+            const Icon = ICONS[s.icon] ?? Trophy;
+            return (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="rounded-2xl glass-card p-6 text-center"
+              >
+                <Icon className="mx-auto mb-3 h-8 w-8 text-gold" />
+                <div className="text-3xl font-black text-gradient-gold md:text-4xl">{s.value}</div>
+                <div className="mt-2 text-xs text-white/70 md:text-sm">{t(s.label_ar, s.label_en)}</div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -313,44 +320,43 @@ function Achievements() {
 }
 
 function Careers() {
-  const { t } = useLang();
-  const careers = [
-    { ar_n: "محلل أعمال", en_n: "Business Analyst", ar_b: "تجميع متطلبات يدوي.", en_b: "Manual requirement gathering.", ar_a: "تحليل تنبؤي مدعوم بـ AI.", en_a: "AI-augmented predictive analysis.", skills: ["SQL", "Power BI", "ChatGPT"] },
-    { ar_n: "مهندس بيانات", en_n: "Data Engineer", ar_b: "ETL تقليدي.", en_b: "Traditional ETL.", ar_a: "بناء بحيرات بيانات ذكية.", en_a: "Intelligent data-lake pipelines.", skills: ["Python", "Airflow", "dbt"] },
-    { ar_n: "مدير منتج رقمي", en_n: "Digital Product Manager", ar_b: "إدارة وثائق وخرائط.", en_b: "Specs & roadmap management.", ar_a: "اتخاذ قرار مدعوم بنماذج AI.", en_a: "Decision-making backed by AI models.", skills: ["Strategy", "AI Tools", "UX"] },
-  ];
+  const { t, lang } = useLang();
+  const careers = useTable("careers");
   return (
     <Section id="careers" className="bg-background">
       <SectionHeader eyebrow={t("AI × BIS", "AI × BIS")} title={t("الوظائف قبل وبعد الذكاء الاصطناعي", "Careers before and after AI")} />
       <div className="grid gap-6 md:grid-cols-3">
-        {careers.map((c, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
-            className="overflow-hidden rounded-2xl border bg-card shadow-elevated"
-          >
-            <div className="bg-navy-deep p-6 text-white">
-              <Briefcase className="mb-3 h-8 w-8 text-gold" />
-              <h3 className="text-xl font-bold">{t(c.ar_n, c.en_n)}</h3>
-            </div>
-            <div className="space-y-4 p-6">
-              <div>
-                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("قبل AI", "Before AI")}</div>
-                <p className="text-sm">{t(c.ar_b, c.en_b)}</p>
+        {careers.map((c: any, i: number) => {
+          const skills = (lang === "ar" ? c.skills_ar : c.skills_en) ?? [];
+          return (
+            <motion.div
+              key={c.id}
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="overflow-hidden rounded-2xl border bg-card shadow-elevated"
+            >
+              <div className="bg-navy-deep p-6 text-white">
+                <Briefcase className="mb-3 h-8 w-8 text-gold" />
+                <h3 className="text-xl font-bold">{t(c.name_ar, c.name_en)}</h3>
               </div>
-              <div className="rounded-xl bg-gold/10 p-4">
-                <div className="mb-1 text-xs font-bold uppercase tracking-widest text-gold">{t("بعد AI", "After AI")}</div>
-                <p className="text-sm font-medium">{t(c.ar_a, c.en_a)}</p>
+              <div className="space-y-4 p-6">
+                <div>
+                  <div className="mb-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t("قبل AI", "Before AI")}</div>
+                  <p className="text-sm">{t(c.before_ai_ar, c.before_ai_en)}</p>
+                </div>
+                <div className="rounded-xl bg-gold/10 p-4">
+                  <div className="mb-1 text-xs font-bold uppercase tracking-widest text-gold">{t("بعد AI", "After AI")}</div>
+                  <p className="text-sm font-medium">{t(c.after_ai_ar, c.after_ai_en)}</p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {skills.map((s: string) => (
+                    <span key={s} className="rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-navy-deep">{s}</span>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {c.skills.map(s => (
-                  <span key={s} className="rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-navy-deep">{s}</span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     </Section>
   );
@@ -435,36 +441,31 @@ function FutureSkills() {
 
 function Speakers() {
   const { t } = useLang();
-  const speakers = [
-    { name_ar: "د. أحمد محمد", name_en: "Dr. Ahmed Mohamed", pos_ar: "رئيس قسم BIS", pos_en: "Head of BIS Dept.", bio_ar: "خبرة 15 عامًا في أنظمة المعلومات.", bio_en: "15 years in BIS." },
-    { name_ar: "أ. سارة علي", name_en: "Eng. Sara Ali", pos_ar: "محاضر — الذكاء الاصطناعي", pos_en: "AI Lecturer", bio_ar: "متخصصة في تطبيقات AI للأعمال.", bio_en: "AI for business specialist." },
-    { name_ar: "أ. كريم حسن", name_en: "Mr. Karim Hassan", pos_ar: "مستشار سوق العمل", pos_en: "Industry Mentor", bio_ar: "يربط الطلاب بفرص العمل الرقمي.", bio_en: "Bridges students with digital careers." },
-  ];
+  const speakers = useTable("speakers");
   return (
     <Section id="speakers" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المتحدثون", "Speakers")} title={t("نخبة من الخبراء", "A panel of experts")} />
       <div className="grid gap-6 md:grid-cols-3">
-        {speakers.map((s, i) => (
+        {speakers.map((s: any, i: number) => (
           <motion.div
-            key={i}
+            key={s.id}
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
             className="group overflow-hidden rounded-2xl border bg-card shadow-elevated"
           >
             <div className="relative aspect-square bg-gradient-to-br from-navy-deep to-navy">
-              <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
-                {(s.name_en || s.name_ar).charAt(0)}
-              </div>
+              {s.photo_url ? (
+                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
+                  {(s.name_en || s.name_ar || "?").charAt(0)}
+                </div>
+              )}
             </div>
             <div className="p-6">
               <h3 className="text-lg font-bold text-navy-deep">{t(s.name_ar, s.name_en)}</h3>
-              <p className="text-sm font-medium text-gold">{t(s.pos_ar, s.pos_en)}</p>
+              <p className="text-sm font-medium text-gold">{t(s.position_ar, s.position_en)}</p>
               <p className="mt-3 text-sm text-muted-foreground">{t(s.bio_ar, s.bio_en)}</p>
-              <div className="mt-4 flex gap-3 text-muted-foreground">
-                <a href="#" aria-label="LinkedIn" className="hover:text-gold"><Linkedin className="h-4 w-4" /></a>
-                <a href="#" aria-label="Twitter" className="hover:text-gold"><Twitter className="h-4 w-4" /></a>
-                <a href="#" aria-label="Email" className="hover:text-gold"><Mail className="h-4 w-4" /></a>
-              </div>
             </div>
           </motion.div>
         ))}
@@ -534,40 +535,47 @@ function RegisterForm() {
 
 function Gallery() {
   const { t } = useLang();
+  const images = useTable("gallery_images");
   return (
     <Section id="gallery" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المعرض", "Gallery")} title={t("لحظات من فعالياتنا", "Moments from our events")} />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.05 }}
-            className="group aspect-square overflow-hidden rounded-xl bg-gradient-to-br from-navy to-navy-deep shadow-elevated"
-          >
-            <div className="flex h-full w-full items-center justify-center text-gold/30">
-              <Sparkles className="h-10 w-10" />
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <p className="mt-6 text-center text-sm text-muted-foreground">{t("سيتم تحميل صور الفعالية من لوحة الإدارة.", "Event photos will be uploaded from the admin dashboard.")}</p>
+      {images.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground">{t("سيتم تحميل صور الفعالية من لوحة الإدارة.", "Event photos will be uploaded from the admin dashboard.")}</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {images.map((img: any, i: number) => (
+            <motion.div
+              key={img.id}
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              className="group aspect-square overflow-hidden rounded-xl shadow-elevated"
+            >
+              <img src={img.url} alt={img.caption_ar ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" />
+            </motion.div>
+          ))}
+        </div>
+      )}
     </Section>
   );
 }
 
 function Sponsors() {
   const { t } = useLang();
+  const sponsors = useTable("sponsors");
   return (
     <Section id="sponsors" className="bg-background">
       <SectionHeader eyebrow={t("الشركاء", "Partners")} title={t("شركاؤنا في النجاح", "Our partners in success")} />
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex h-24 items-center justify-center rounded-xl border bg-card text-muted-foreground shadow-elevated">
-            <Globe className="h-8 w-8" />
-          </div>
-        ))}
-      </div>
+      {sponsors.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground">{t("سيتم إضافة الرعاة قريبًا.", "Sponsors will be added soon.")}</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-6">
+          {sponsors.map((s: any) => (
+            <a key={s.id} href={s.website ?? "#"} target="_blank" rel="noopener noreferrer" className="flex h-24 items-center justify-center rounded-xl border bg-card p-3 shadow-elevated hover:border-gold transition">
+              {s.logo_url ? <img src={s.logo_url} alt={s.name} className="max-h-full max-w-full object-contain" /> : <span className="text-sm font-semibold">{s.name}</span>}
+            </a>
+          ))}
+        </div>
+      )}
     </Section>
   );
 }
@@ -599,7 +607,7 @@ function Footer() {
     <footer className="bg-navy-deep px-6 py-12 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-3">
         <div>
-          <img src={shoroukLogo.url} alt="" className="h-16 w-auto rounded-md bg-white/95 p-1.5" />
+          <img src={bisLogo.url} alt="BIS" className="h-20 w-auto" />
           <p className="mt-4 text-sm">{t("قسم نظم معلومات الأعمال — أكاديمية الشروق", "Business Information Systems — Shorouk Academy")}</p>
         </div>
         <div>
