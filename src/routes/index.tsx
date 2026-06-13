@@ -1,28 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar, Clock, MapPin, Sparkles, Brain, Briefcase, TrendingUp, Code2,
   Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft,
   Linkedin, Twitter, Mail, Phone, Facebook, Instagram, Globe, Languages,
+  Building2,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import shoroukLogo from "@/assets/shorouk-logo.png.asset.json";
+import bisLogo from "@/assets/bis-logo.jpeg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "الملتقى العلمي لنظم معلومات الأعمال — أكاديمية الشروق" },
-      { name: "description", content: "كيف يغير الذكاء الاصطناعي وظائف وتخصصات BIS؟ ملتقى علمي بقسم BIS بأكاديمية الشروق." },
+      { name: "description", content: "ملتقى علمي بقسم BIS بأكاديمية الشروق — مستقبل وظائف نظم معلومات الأعمال في عصر الذكاء الاصطناعي." },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
   component: Home,
 });
+
+const ICONS: Record<string, any> = { Trophy, GraduationCap, Award, Sparkles, Briefcase, TrendingUp, Building2, Users };
+
+function useRealtime(table: string) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    const channel = supabase
+      .channel(`public-${table}`)
+      .on("postgres_changes", { event: "*", schema: "public", table }, () => {
+        qc.invalidateQueries({ queryKey: [table] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [table, qc]);
+}
+
+function useTable<T = any>(table: string) {
+  useRealtime(table);
+  const { data } = useQuery({
+    queryKey: [table],
+    queryFn: async () => {
+      const { data } = await supabase.from(table as any).select("*").order("order_index", { ascending: true });
+      return (data as T[]) ?? [];
+    },
+  });
+  return data ?? [];
+}
 
 /* -------------- Reusable bits -------------- */
 
