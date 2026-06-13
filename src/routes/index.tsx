@@ -16,8 +16,8 @@ import shoroukLogo from "@/assets/shorouk-logo.png.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "الملتقى العملي لنظم معلومات الأعمال — أكاديمية الشروق" },
-      { name: "description", content: "كيف يغير الذكاء الاصطناعي وظائف وتخصصات MIS؟ ملتقى علمي بقسم BIS بأكاديمية الشروق." },
+      { title: "الملتقى العلمي لنظم معلومات الأعمال — أكاديمية الشروق" },
+      { name: "description", content: "كيف يغير الذكاء الاصطناعي وظائف وتخصصات BIS؟ ملتقى علمي بقسم BIS بأكاديمية الشروق." },
     ],
     links: [{ rel: "canonical", href: "/" }],
   }),
@@ -117,7 +117,7 @@ function Hero() {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.7 }}
           className="mt-6 text-4xl font-black leading-tight md:text-7xl"
         >
-          {t("الملتقى العملي لنظم", "The Practical Forum for")}{" "}
+          {t("الملتقى العلمي لنظم", "The Practical Forum for")}{" "}
           <span className="text-gradient-gold">{t("معلومات الأعمال", "Business Information Systems")}</span>
         </motion.h1>
 
@@ -126,8 +126,8 @@ function Hero() {
           className="mt-6 max-w-2xl text-lg text-white/80 md:text-xl"
         >
           {t(
-            "كيف يغير الذكاء الاصطناعي وظائف وتخصصات MIS؟",
-            "How is AI reshaping the careers and disciplines of MIS?",
+            "كيف يغير الذكاء الاصطناعي وظائف وتخصصات BIS؟",
+            "How is AI reshaping the careers and disciplines of BIS?",
           )}
         </motion.p>
 
@@ -164,8 +164,8 @@ function Hero() {
 function About() {
   const { t } = useLang();
   const items = [
-    { ar: "تعريف الطلاب بأن MIS هو حلقة الربط بين الأعمال والتكنولوجيا والبيانات.", en: "Teach students that MIS bridges business, technology, and data." },
-    { ar: "توضيح أن الذكاء الاصطناعي لن يلغي وظائف MIS بل سيعيد تشكيلها.", en: "Show that AI won't eliminate MIS roles — it will reshape them." },
+    { ar: "تعريف الطلاب بأن BIS هو حلقة الربط بين الأعمال والتكنولوجيا والبيانات.", en: "Teach students that BIS bridges business, technology, and data." },
+    { ar: "توضيح أن الذكاء الاصطناعي لن يلغي وظائف BIS بل سيعيد تشكيلها.", en: "Show that AI won't eliminate BIS roles — it will reshape them." },
     { ar: "تدريب الطلاب على الحوار والمناظرة المهنية حول مستقبل وظائفهم.", en: "Train students in professional dialogue about the future of their careers." },
     { ar: "الخروج بتوصيات واضحة: ماذا يتعلمون، وكيف يقدمون أنفسهم لسوق العمل.", en: "Leave with concrete recommendations on what to learn and how to present yourself." },
   ];
@@ -175,8 +175,8 @@ function About() {
         eyebrow={t("عن الملتقى", "About the Event")}
         title={t("ملتقى عملي يربط بين الأكاديميا وسوق العمل", "A hands-on forum bridging academia and industry")}
         subtitle={t(
-          "ليس مجرد محاضرة، بل لقاء تفاعلي يجمع عرض الإنجازات ومحتوى مهني عن AI × MIS ومناظرات طلابية مع الدكتور.",
-          "More than a lecture — an interactive gathering combining achievements, AI × MIS career content, and student debates with the professor.",
+          "ليس مجرد محاضرة، بل لقاء تفاعلي يجمع عرض الإنجازات ومحتوى مهني عن AI × BIS ومناظرات طلابية مع الدكتور.",
+          "More than a lecture — an interactive gathering combining achievements, AI × BIS career content, and student debates with the professor.",
         )}
       />
       <div className="grid gap-5 md:grid-cols-2">
@@ -201,7 +201,7 @@ function About() {
 function WhyMatters() {
   const { t } = useLang();
   const cards = [
-    { Icon: Brain, ar_t: "مستقبل MIS", en_t: "Future of MIS", ar_d: "تحول جذري في أدوار التحليل والقرار وحوكمة التقنية.", en_d: "A radical shift in analysis, decision-making, and IT governance roles." },
+    { Icon: Brain, ar_t: "مستقبل BIS", en_t: "Future of BIS", ar_d: "تحول جذري في أدوار التحليل والقرار وحوكمة التقنية.", en_d: "A radical shift in analysis, decision-making, and IT governance roles." },
     { Icon: Sparkles, ar_t: "أثر الذكاء الاصطناعي", en_t: "AI Impact", en_d: "Automation reshapes work — but elevates the analytical professional.", ar_d: "الأتمتة تعيد تشكيل العمل، وترفع سقف المهني التحليلي." },
     { Icon: TrendingUp, ar_t: "فرص السوق", en_t: "Market Opportunities", ar_d: "وظائف جديدة: AI Business Analyst، Data Governance، Automation Consultant.", en_d: "New roles: AI Business Analyst, Data Governance, Automation Consultant." },
     { Icon: Code2, ar_t: "المهارات المطلوبة", en_t: "Required Skills", ar_d: "SQL، BI، أدوات AI، أخلاقيات البيانات، إدارة المشاريع الرقمية.", en_d: "SQL, BI, AI tools, data ethics, digital project management." },
@@ -234,9 +234,9 @@ function Timeline() {
     { time: "10:30 — 10:55", ar_t: "الاستقبال وتجهيز القاعة", en_t: "Reception & hall setup", ar_d: "تسجيل الحضور وتشغيل شاشة الترحيب.", en_d: "Attendee check-in and welcome screen.", speaker: t("فريق التنظيم", "Organizing team") },
     { time: "11:00 — 11:05", ar_t: "الافتتاح والترحيب", en_t: "Opening & welcome", ar_d: "تعريف بعنوان الملتقى ومسار اليوم.", en_d: "Event introduction and agenda overview.", speaker: t("مقدم الملتقى", "Host") },
     { time: "11:10 — 11:25", ar_t: "إنجازات المعهد وقسم BIS", en_t: "Institute & BIS achievements", ar_d: "عرض موجز لأبرز إنجازات الأكاديمية والقسم.", en_d: "Highlights from the academy and department.", speaker: t("ممثل الإدارة", "Administration") },
-    { time: "11:30 — 11:50", ar_t: "أثر AI على وظائف MIS", en_t: "AI's impact on MIS careers", ar_d: "شرح عملي للوظائف قبل وبعد AI والمهارات المطلوبة.", en_d: "MIS careers before/after AI and required skills.", speaker: t("الدكتور", "Lead Speaker") },
+    { time: "11:30 — 11:50", ar_t: "أثر AI على وظائف BIS", en_t: "AI's impact on BIS careers", ar_d: "شرح عملي للوظائف قبل وبعد AI والمهارات المطلوبة.", en_d: "BIS careers before/after AI and required skills.", speaker: t("الدكتور", "Lead Speaker") },
     { time: "11:55 — 12:05", ar_t: "استراحة قصيرة", en_t: "Short break", ar_d: "مشروبات وتجهيز فرق المناظرة.", en_d: "Refreshments and debate team prep.", speaker: t("الضيافة", "Hospitality") },
-    { time: "12:10 — 12:35", ar_t: "مناظرات الطلاب مع الدكتور", en_t: "Student debates with the professor", ar_d: "هل يستبدل AI وظائف MIS أم يصنع فرصًا أفضل؟", en_d: "Will AI replace MIS roles or create better opportunities?", speaker: t("فريقا طلاب + الدكتور", "Two student teams + professor") },
+    { time: "12:10 — 12:35", ar_t: "مناظرات الطلاب مع الدكتور", en_t: "Student debates with the professor", ar_d: "هل يستبدل AI وظائف BIS أم يصنع فرصًا أفضل؟", en_d: "Will AI replace BIS roles or create better opportunities?", speaker: t("فريقا طلاب + الدكتور", "Two student teams + professor") },
     { time: "12:40 — 12:50", ar_t: "أسئلة مفتوحة", en_t: "Open Q&A", ar_d: "أسئلة وتدخلات من الجمهور.", en_d: "Questions and audience contributions.", speaker: t("الدكتور والمقدم", "Speaker & host") },
     { time: "12:55 — 1:00", ar_t: "التوصيات والصورة الجماعية", en_t: "Recommendations & group photo", ar_d: "تلخيص الرسائل الأساسية وشكر الحضور.", en_d: "Wrap-up, thanks, and group photo.", speaker: t("الفريق", "All") },
   ];
@@ -321,7 +321,7 @@ function Careers() {
   ];
   return (
     <Section id="careers" className="bg-background">
-      <SectionHeader eyebrow={t("AI × MIS", "AI × MIS")} title={t("الوظائف قبل وبعد الذكاء الاصطناعي", "Careers before and after AI")} />
+      <SectionHeader eyebrow={t("AI × BIS", "AI × BIS")} title={t("الوظائف قبل وبعد الذكاء الاصطناعي", "Careers before and after AI")} />
       <div className="grid gap-6 md:grid-cols-3">
         {careers.map((c, i) => (
           <motion.div
@@ -362,11 +362,11 @@ function Debate() {
     <Section id="debate" className="bg-secondary/40">
       <SectionHeader
         eyebrow={t("مناظرة طلابية", "Student Debate")}
-        title={t("هل يستبدل AI وظائف MIS أم يصنع فرصًا أفضل؟", "Will AI replace MIS jobs or create better opportunities?")}
+        title={t("هل يستبدل AI وظائف BIS أم يصنع فرصًا أفضل؟", "Will AI replace BIS jobs or create better opportunities?")}
       />
       <div className="grid gap-6 md:grid-cols-2">
         {[
-          { color: "from-emerald-500/20 to-emerald-500/5", tag: t("الفريق المؤيد", "Team A — Supports"), ar_t: "AI يضاعف قدرات MIS", en_t: "AI multiplies MIS capability",
+          { color: "from-emerald-500/20 to-emerald-500/5", tag: t("الفريق المؤيد", "Team A — Supports"), ar_t: "AI يضاعف قدرات BIS", en_t: "AI multiplies BIS capability",
             points: [
               { ar: "تركيز أعلى على التحليل واتخاذ القرار.", en: "Higher focus on analysis and decision-making." },
               { ar: "وظائف جديدة: AI Business Analyst، Data Governance.", en: "New jobs: AI Business Analyst, Data Governance." },
@@ -413,7 +413,7 @@ function FutureSkills() {
   ];
   return (
     <Section id="skills" className="bg-background">
-      <SectionHeader eyebrow={t("مهارات المستقبل", "Future Skills")} title={t("ما يحتاجه خريج MIS الآن", "What today's MIS graduate needs")} />
+      <SectionHeader eyebrow={t("مهارات المستقبل", "Future Skills")} title={t("ما يحتاجه خريج BIS الآن", "What today's BIS graduate needs")} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {skills.map((s, i) => (
           <motion.div
@@ -436,7 +436,7 @@ function FutureSkills() {
 function Speakers() {
   const { t } = useLang();
   const speakers = [
-    { name_ar: "د. أحمد محمد", name_en: "Dr. Ahmed Mohamed", pos_ar: "رئيس قسم BIS", pos_en: "Head of BIS Dept.", bio_ar: "خبرة 15 عامًا في أنظمة المعلومات.", bio_en: "15 years in MIS." },
+    { name_ar: "د. أحمد محمد", name_en: "Dr. Ahmed Mohamed", pos_ar: "رئيس قسم BIS", pos_en: "Head of BIS Dept.", bio_ar: "خبرة 15 عامًا في أنظمة المعلومات.", bio_en: "15 years in BIS." },
     { name_ar: "أ. سارة علي", name_en: "Eng. Sara Ali", pos_ar: "محاضر — الذكاء الاصطناعي", pos_en: "AI Lecturer", bio_ar: "متخصصة في تطبيقات AI للأعمال.", bio_en: "AI for business specialist." },
     { name_ar: "أ. كريم حسن", name_en: "Mr. Karim Hassan", pos_ar: "مستشار سوق العمل", pos_en: "Industry Mentor", bio_ar: "يربط الطلاب بفرص العمل الرقمي.", bio_en: "Bridges students with digital careers." },
   ];
