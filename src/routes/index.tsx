@@ -485,7 +485,7 @@ function FutureSkills() {
 
 function Speakers() {
   const { t } = useLang();
-  const speakers = useTable("speakers");
+  const speakers = useTableWithMedia("speakers", ["photo_url"]);
   return (
     <Section id="speakers" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المتحدثون", "Speakers")} title={t("نخبة من الخبراء", "A panel of experts")} />
@@ -498,8 +498,8 @@ function Speakers() {
             className="group overflow-hidden rounded-2xl border bg-card shadow-elevated"
           >
             <div className="relative aspect-square bg-gradient-to-br from-navy-deep to-navy">
-              {s.photo_url ? (
-                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" />
+              {isLikelyImageUrl(s.photo_url) ? (
+                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
                   {(s.name_en || s.name_ar || "?").charAt(0)}
