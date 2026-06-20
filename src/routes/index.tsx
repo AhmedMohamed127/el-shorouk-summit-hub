@@ -13,7 +13,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import bisLogo from "@/assets/bis-logo.jpeg.asset.json";
+import bisLogo from "@/assets/bis-logo-v2.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
