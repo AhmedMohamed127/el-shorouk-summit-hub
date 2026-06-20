@@ -156,8 +156,8 @@ function Hero() {
           className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm md:text-base"
         >
           {[
-            { Icon: Calendar, label: t("الأسبوع الأخير من يوليو", "Last week of July") },
-            { Icon: Clock, label: t("11:00 ص — 1:00 م", "11:00 AM — 1:00 PM") },
+            { Icon: Calendar, label: t("الاثنين 6 يوليو", "Monday, July 6") },
+            { Icon: Clock, label: t("11:00 ص — 3:00 م", "11:00 AM — 3:00 PM") },
             { Icon: MapPin, label: t("مبنى د — قاعة السمنار", "Building D — Seminar Hall") },
           ].map(({ Icon, label }) => (
             <div key={label} className="flex items-center gap-2 rounded-full glass-card px-5 py-2.5">
@@ -193,10 +193,10 @@ function About() {
     <Section id="about" className="bg-background">
       <SectionHeader
         eyebrow={t("عن الملتقى", "About the Event")}
-        title={t("ملتقى عملي يربط بين الأكاديميا وسوق العمل", "A hands-on forum bridging academia and industry")}
+        title={t("ملتقى علمي يربط بين التعليم الأكاديمي وسوق العمل", "A scientific forum bridging academic education and industry")}
         subtitle={t(
-          "ليس مجرد محاضرة، بل لقاء تفاعلي يجمع عرض الإنجازات ومحتوى مهني عن AI × BIS ومناظرات طلابية مع الدكتور.",
-          "More than a lecture — an interactive gathering combining achievements, AI × BIS career content, and student debates with the professor.",
+          "ليس مجرد محاضرة، بل لقاء تفاعلي يجمع عرض الإنجازات ومحتوى مهني عن AI × BIS ومناظرات طلابية مع المتحدثين",
+          "More than a lecture — an interactive gathering combining achievements, AI × BIS career content, and student debates with the speakers",
         )}
       />
       <div className="grid gap-5 md:grid-cols-2">
@@ -367,7 +367,7 @@ function Debate() {
   return (
     <Section id="debate" className="bg-secondary/40">
       <SectionHeader
-        eyebrow={t("مناظرة طلابية", "Student Debate")}
+        eyebrow={t("مناظرات الطلاب ", "Student Debate")}
         title={t("هل يستبدل AI وظائف BIS أم يصنع فرصًا أفضل؟", "Will AI replace BIS jobs or create better opportunities?")}
       />
       <div className="grid gap-6 md:grid-cols-2">
@@ -613,8 +613,8 @@ function Footer() {
         <div>
           <h4 className="mb-3 font-bold text-white">{t("تواصل معنا", "Contact")}</h4>
           <ul className="space-y-2 text-sm">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-gold" /> bis@sha.edu.eg</li>
-            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-gold" /> +20 100 000 0000</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-gold" /> ahm.mohamed@sha.edu.eg</li>
+            <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-gold" /> +20 1000782130</li>
             <li className="flex items-center gap-2"><MapPin className="h-4 w-4 text-gold" /> {t("القاهرة، مصر", "Cairo, Egypt")}</li>
           </ul>
         </div>
