@@ -561,7 +561,7 @@ function RegisterForm() {
 
 function Gallery() {
   const { t } = useLang();
-  const images = useTable("gallery_images");
+  const images = useGalleryImages();
   return (
     <Section id="gallery" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المعرض", "Gallery")} title={t("لحظات من فعالياتنا", "Moments from our events")} />
@@ -576,7 +576,7 @@ function Gallery() {
               transition={{ delay: i * 0.05 }}
               className="group aspect-square overflow-hidden rounded-xl shadow-elevated"
             >
-              <img src={img.url} alt={img.caption_ar ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" />
+              <img src={img.url} alt={img.caption_ar ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
             </motion.div>
           ))}
         </div>
