@@ -53,6 +53,31 @@ function useTable<T = any>(table: string) {
   return data ?? [];
 }
 
+function getMediaPath(url: string) {
+  const marker = "/storage/v1/object/public/media/";
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return decodeURIComponent(url.slice(markerIndex + marker.length).split("?")[0]);
+}
+
+function useGalleryImages() {
+  useRealtime("gallery_images");
+  const { data } = useQuery({
+    queryKey: ["gallery_images"],
+    queryFn: async () => {
+      const { data } = await supabase.from("gallery_images").select("*").order("order_index", { ascending: true });
+      const images = (data as any[]) ?? [];
+      return Promise.all(images.map(async (image) => {
+        const path = getMediaPath(image.url ?? "");
+        if (!path) return image;
+        const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
+        return { ...image, url: signed?.signedUrl ?? image.url };
+      }));
+    },
+  });
+  return data ?? [];
+}
+
 /* -------------- Reusable bits -------------- */
 
 function LangSwitch() {
