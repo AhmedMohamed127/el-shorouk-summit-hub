@@ -420,12 +420,19 @@ function GalleryAdmin() {
     if (!file) return;
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `gallery/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("media").upload(path, file);
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("media").upload(path, file, {
+        contentType: file.type || undefined,
+        upsert: false,
+      });
       if (error) throw error;
-      const { data } = supabase.storage.from("media").getPublicUrl(path);
-      const { error: e2 } = await supabase.from("gallery_images").insert({ url: data.publicUrl, order_index: rows.length });
+      // Bucket is private — create a long-lived signed URL (10 years)
+      const { data: signed, error: signErr } = await supabase.storage
+        .from("media")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr) throw signErr;
+      const { error: e2 } = await supabase.from("gallery_images").insert({ url: signed.signedUrl, order_index: rows.length });
       if (e2) throw e2;
       toast.success(t("تم الرفع", "Uploaded"));
       qc.invalidateQueries({ queryKey: ["gallery_images"] });
@@ -433,6 +440,7 @@ function GalleryAdmin() {
       toast.error(err.message);
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -442,9 +450,10 @@ function GalleryAdmin() {
       <Card className="p-5 mb-6">
         <label className="inline-flex items-center gap-2 cursor-pointer bg-navy-deep text-white rounded-lg px-4 py-2 text-sm font-semibold">
           <Plus className="h-4 w-4" /> {uploading ? "..." : t("رفع صورة", "Upload Image")}
-          <input type="file" accept="image/*" onChange={upload} className="hidden" disabled={uploading} />
+          <input type="file" accept="image/*,.heic,.heif,.svg,.webp,.avif,.gif" onChange={upload} className="hidden" disabled={uploading} />
         </label>
       </Card>
+
       <Card className="p-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {rows.map((r: any) => (
