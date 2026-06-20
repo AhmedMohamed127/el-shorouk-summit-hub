@@ -13,7 +13,7 @@ import {
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import bisLogo from "@/assets/bis-logo.jpeg.asset.json";
+import bisLogo from "@/assets/bis-logo-v2.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -92,10 +92,11 @@ function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: s
 function Section({ id, children, className = "" }: { id: string; children: React.ReactNode; className?: string }) {
   return (
     <section id={id} className={`relative py-20 md:py-28 ${className}`}>
-      <div className="mx-auto max-w-7xl px-6">{children}</div>
+      <div className="mx-auto max-w-7xl px-6 text-center">{children}</div>
     </section>
   );
 }
+
 
 /* -------------- Hero -------------- */
 
