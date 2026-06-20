@@ -53,6 +53,49 @@ function useTable<T = any>(table: string) {
   return data ?? [];
 }
 
+function getMediaPath(url: string) {
+  const marker = "/storage/v1/object/public/media/";
+  const markerIndex = url.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return decodeURIComponent(url.slice(markerIndex + marker.length).split("?")[0]);
+}
+
+function isLikelyImageUrl(url?: string | null) {
+  if (!url) return false;
+  return /\.(avif|gif|heic|heif|jpe?g|png|svg|webp)(\?.*)?$/i.test(url) || url.includes("/storage/v1/object/");
+}
+
+async function resolveMediaUrl(url?: string | null) {
+  if (!url) return "";
+  const path = getMediaPath(url);
+  if (!path) return url;
+  const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
+  return signed?.signedUrl ?? url;
+}
+
+function useTableWithMedia<T = any>(table: string, mediaFields: string[]) {
+  useRealtime(table);
+  const { data } = useQuery({
+    queryKey: [table, "media"],
+    queryFn: async () => {
+      const { data } = await supabase.from(table as any).select("*").order("order_index", { ascending: true });
+      const rows = ((data as T[]) ?? []) as any[];
+      return Promise.all(rows.map(async (row) => {
+        const resolved = { ...row };
+        await Promise.all(mediaFields.map(async (field) => {
+          resolved[field] = await resolveMediaUrl(row[field]);
+        }));
+        return resolved;
+      })) as Promise<T[]>;
+    },
+  });
+  return data ?? [];
+}
+
+function useGalleryImages() {
+  return useTableWithMedia("gallery_images", ["url"]);
+}
+
 /* -------------- Reusable bits -------------- */
 
 function LangSwitch() {
@@ -442,7 +485,7 @@ function FutureSkills() {
 
 function Speakers() {
   const { t } = useLang();
-  const speakers = useTable("speakers");
+  const speakers = useTableWithMedia("speakers", ["photo_url"]);
   return (
     <Section id="speakers" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المتحدثون", "Speakers")} title={t("نخبة من الخبراء", "A panel of experts")} />
@@ -455,8 +498,8 @@ function Speakers() {
             className="group overflow-hidden rounded-2xl border bg-card shadow-elevated"
           >
             <div className="relative aspect-square bg-gradient-to-br from-navy-deep to-navy">
-              {s.photo_url ? (
-                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" />
+              {isLikelyImageUrl(s.photo_url) ? (
+                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
                   {(s.name_en || s.name_ar || "?").charAt(0)}
@@ -536,7 +579,7 @@ function RegisterForm() {
 
 function Gallery() {
   const { t } = useLang();
-  const images = useTable("gallery_images");
+  const images = useGalleryImages();
   return (
     <Section id="gallery" className="bg-secondary/40">
       <SectionHeader eyebrow={t("المعرض", "Gallery")} title={t("لحظات من فعالياتنا", "Moments from our events")} />
@@ -551,7 +594,7 @@ function Gallery() {
               transition={{ delay: i * 0.05 }}
               className="group aspect-square overflow-hidden rounded-xl shadow-elevated"
             >
-              <img src={img.url} alt={img.caption_ar ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" />
+              <img src={img.url} alt={img.caption_ar ?? ""} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
             </motion.div>
           ))}
         </div>
