@@ -60,22 +60,40 @@ function getMediaPath(url: string) {
   return decodeURIComponent(url.slice(markerIndex + marker.length).split("?")[0]);
 }
 
-function useGalleryImages() {
-  useRealtime("gallery_images");
+function isLikelyImageUrl(url?: string | null) {
+  if (!url) return false;
+  return /\.(avif|gif|heic|heif|jpe?g|png|svg|webp)(\?.*)?$/i.test(url) || url.includes("/storage/v1/object/");
+}
+
+async function resolveMediaUrl(url?: string | null) {
+  if (!url) return "";
+  const path = getMediaPath(url);
+  if (!path) return url;
+  const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
+  return signed?.signedUrl ?? url;
+}
+
+function useTableWithMedia<T = any>(table: string, mediaFields: string[]) {
+  useRealtime(table);
   const { data } = useQuery({
-    queryKey: ["gallery_images"],
+    queryKey: [table, "media"],
     queryFn: async () => {
-      const { data } = await supabase.from("gallery_images").select("*").order("order_index", { ascending: true });
-      const images = (data as any[]) ?? [];
-      return Promise.all(images.map(async (image) => {
-        const path = getMediaPath(image.url ?? "");
-        if (!path) return image;
-        const { data: signed } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365);
-        return { ...image, url: signed?.signedUrl ?? image.url };
-      }));
+      const { data } = await supabase.from(table as any).select("*").order("order_index", { ascending: true });
+      const rows = ((data as T[]) ?? []) as any[];
+      return Promise.all(rows.map(async (row) => {
+        const resolved = { ...row };
+        await Promise.all(mediaFields.map(async (field) => {
+          resolved[field] = await resolveMediaUrl(row[field]);
+        }));
+        return resolved;
+      })) as Promise<T[]>;
     },
   });
   return data ?? [];
+}
+
+function useGalleryImages() {
+  return useTableWithMedia("gallery_images", ["url"]);
 }
 
 /* -------------- Reusable bits -------------- */
