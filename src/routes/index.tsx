@@ -62,7 +62,7 @@ function getMediaPath(url: string) {
 
 function isLikelyImageUrl(url?: string | null) {
   if (!url) return false;
-  return /\.(avif|gif|heic|heif|jpe?g|png|svg|webp)(\?.*)?$/i.test(url) || url.includes("/storage/v1/object/");
+  return /^(https?:|data:image\/|blob:|\/)/i.test(url.trim());
 }
 
 async function resolveMediaUrl(url?: string | null) {
