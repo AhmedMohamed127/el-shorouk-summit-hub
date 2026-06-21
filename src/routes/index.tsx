@@ -569,6 +569,7 @@ function RegisterForm() {
             <option>{t("الثانية", "Second")}</option>
             <option>{t("الثالثة", "Third")}</option>
             <option>{t("الرابعة", "Fourth")}</option>
+            <option>{t("غير طالب", "Non-student")}</option>
           </select>
           <input className={field} placeholder={t("القسم", "Department")} value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
         </div>
