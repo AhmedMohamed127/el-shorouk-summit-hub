@@ -62,7 +62,7 @@ function getMediaPath(url: string) {
 
 function isLikelyImageUrl(url?: string | null) {
   if (!url) return false;
-  return /\.(avif|gif|heic|heif|jpe?g|png|svg|webp)(\?.*)?$/i.test(url) || url.includes("/storage/v1/object/");
+  return /^(https?:|data:image\/|blob:|\/)/i.test(url.trim());
 }
 
 async function resolveMediaUrl(url?: string | null) {
@@ -498,12 +498,18 @@ function Speakers() {
             className="group overflow-hidden rounded-2xl border bg-card shadow-elevated"
           >
             <div className="relative aspect-square bg-gradient-to-br from-navy-deep to-navy">
-              {isLikelyImageUrl(s.photo_url) ? (
-                <img src={s.photo_url} alt={s.name_ar} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
-                  {(s.name_en || s.name_ar || "?").charAt(0)}
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center text-7xl font-black text-gold/30">
+                {(s.name_en || s.name_ar || "?").charAt(0)}
+              </div>
+              {isLikelyImageUrl(s.photo_url) && (
+                <img
+                  src={s.photo_url}
+                  alt={s.name_ar}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                />
               )}
             </div>
             <div className="p-6">
