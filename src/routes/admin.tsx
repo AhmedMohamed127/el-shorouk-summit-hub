@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Mic, Image as ImageIcon, Calendar, Briefcase,
   Building2, LogOut, Download, Plus, Trash2, Save, Settings, Trophy,
+  MessageCircleQuestion, Star, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "registrations" | "sessions" | "speakers" | "achievements" | "gallery" | "sponsors" | "careers" | "settings";
+type Tab = "dashboard" | "registrations" | "questions" | "reviews" | "sessions" | "speakers" | "achievements" | "gallery" | "sponsors" | "careers" | "settings";
 
 function AdminPage() {
   const { t } = useLang();
@@ -48,6 +49,8 @@ function AdminPage() {
   const items: { id: Tab; label: string; Icon: any }[] = [
     { id: "dashboard", label: t("الرئيسية", "Dashboard"), Icon: LayoutDashboard },
     { id: "registrations", label: t("التسجيلات", "Registrations"), Icon: Users },
+    { id: "questions", label: t("الأسئلة", "Questions"), Icon: MessageCircleQuestion },
+    { id: "reviews", label: t("التقييمات", "Reviews"), Icon: Star },
     { id: "sessions", label: t("الجدول", "Sessions"), Icon: Calendar },
     { id: "speakers", label: t("المتحدثون", "Speakers"), Icon: Mic },
     { id: "achievements", label: t("الإنجازات", "Achievements"), Icon: Trophy },
@@ -86,6 +89,8 @@ function AdminPage() {
       <main className="flex-1 p-8 overflow-auto">
         {tab === "dashboard" && <Dashboard />}
         {tab === "registrations" && <Registrations />}
+        {tab === "questions" && <QuestionsAdmin />}
+        {tab === "reviews" && <ReviewsAdmin />}
         {tab === "sessions" && <SessionsAdmin />}
         {tab === "speakers" && <SpeakersAdmin />}
         {tab === "achievements" && <AchievementsAdmin />}
