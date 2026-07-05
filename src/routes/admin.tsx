@@ -661,3 +661,181 @@ function AchievementsAdmin() {
     </>
   );
 }
+
+/* ---------- Questions (creative carousel) ---------- */
+function QuestionsAdmin() {
+  const { t } = useLang();
+  const qc = useQueryClient();
+  const [idx, setIdx] = useState(0);
+  const { data: rows = [] } = useQuery({
+    queryKey: ["event_questions"],
+    queryFn: async () => {
+      const { data } = await supabase.from("event_questions" as any).select("*").order("created_at", { ascending: false });
+      return (data as any[]) ?? [];
+    },
+  });
+  const remove = async (id: string) => {
+    if (!confirm(t("حذف السؤال؟", "Delete question?"))) return;
+    const { error } = await supabase.from("event_questions" as any).delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success(t("تم الحذف", "Deleted")); qc.invalidateQueries({ queryKey: ["event_questions"] }); }
+  };
+
+  const gradients = [
+    "from-indigo-500 via-purple-500 to-pink-500",
+    "from-emerald-500 via-teal-500 to-cyan-500",
+    "from-amber-500 via-orange-500 to-red-500",
+    "from-sky-500 via-blue-500 to-indigo-500",
+    "from-fuchsia-500 via-pink-500 to-rose-500",
+  ];
+
+  const current = rows[idx];
+  const next = () => setIdx((i) => (rows.length ? (i + 1) % rows.length : 0));
+  const prev = () => setIdx((i) => (rows.length ? (i - 1 + rows.length) % rows.length : 0));
+
+  return (
+    <>
+      <H1>{t("أسئلة الحضور", "Audience Questions")} ({rows.length})</H1>
+      {!rows.length ? (
+        <Card className="p-10 text-center text-slate-400">{t("لا توجد أسئلة بعد", "No questions yet")}</Card>
+      ) : (
+        <>
+          <div className="relative mb-8">
+            <div className="relative mx-auto max-w-2xl">
+              <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+                {rows.slice(0, 3).map((_, i) => (
+                  <div key={i} className="absolute h-72 w-full rounded-3xl bg-slate-200"
+                    style={{ transform: `translate(${(i + 1) * 12}px, ${(i + 1) * 8}px)`, opacity: 0.4 - i * 0.1 }} />
+                ))}
+              </div>
+              <div className={`relative rounded-3xl bg-gradient-to-br ${gradients[idx % gradients.length]} p-8 text-white shadow-2xl min-h-72`}>
+                <div className="flex items-center justify-between text-xs font-semibold opacity-90">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 backdrop-blur">
+                    <MessageCircleQuestion className="h-3.5 w-3.5" /> {idx + 1} / {rows.length}
+                  </span>
+                  <span>{new Date(current.created_at).toLocaleString()}</span>
+                </div>
+                <p className="mt-6 text-2xl font-black leading-snug">"{current.question}"</p>
+                <div className="mt-6 flex items-end justify-between">
+                  <div>
+                    <div className="text-xs uppercase tracking-widest opacity-70">{t("من", "From")}</div>
+                    <div className="text-lg font-bold">{current.name}</div>
+                    {current.target_speaker && (
+                      <div className="mt-1 text-sm opacity-90">→ {current.target_speaker}</div>
+                    )}
+                  </div>
+                  <button onClick={() => remove(current.id)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 backdrop-blur">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-center gap-4">
+                <button onClick={prev} className="rounded-full bg-white p-3 shadow hover:shadow-lg transition"><ChevronLeft className="h-5 w-5" /></button>
+                <div className="flex gap-1.5">
+                  {rows.map((_, i) => (
+                    <button key={i} onClick={() => setIdx(i)}
+                      className={`h-2 rounded-full transition-all ${i === idx ? "w-8 bg-navy-deep" : "w-2 bg-slate-300"}`} />
+                  ))}
+                </div>
+                <button onClick={next} className="rounded-full bg-white p-3 shadow hover:shadow-lg transition"><ChevronRight className="h-5 w-5" /></button>
+              </div>
+            </div>
+          </div>
+          <Card className="p-5">
+            <h2 className="font-bold mb-3">{t("جميع الأسئلة", "All Questions")}</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              {rows.map((r: any, i: number) => (
+                <button key={r.id} onClick={() => setIdx(i)}
+                  className={`text-start rounded-xl border p-3 transition ${i === idx ? "border-navy-deep bg-slate-50" : "border-slate-200 hover:border-slate-400"}`}>
+                  <p className="text-sm line-clamp-2">{r.question}</p>
+                  <p className="mt-1 text-xs text-slate-500">— {r.name}{r.target_speaker ? ` → ${r.target_speaker}` : ""}</p>
+                </button>
+              ))}
+            </div>
+          </Card>
+        </>
+      )}
+    </>
+  );
+}
+
+/* ---------- Reviews ---------- */
+const REVIEW_ROLE_LABELS: Record<string, { ar: string; en: string }> = {
+  student: { ar: "طالب", en: "Student" },
+  doctor: { ar: "دكتور", en: "Doctor" },
+  teaching_assistant: { ar: "معيد", en: "Teaching Assistant" },
+  visitor: { ar: "زائر", en: "Visitor" },
+};
+
+function ReviewsAdmin() {
+  const { t } = useLang();
+  const qc = useQueryClient();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["event_reviews"],
+    queryFn: async () => {
+      const { data } = await supabase.from("event_reviews" as any).select("*").order("created_at", { ascending: false });
+      return (data as any[]) ?? [];
+    },
+  });
+  const remove = async (id: string) => {
+    if (!confirm(t("حذف التقييم؟", "Delete review?"))) return;
+    const { error } = await supabase.from("event_reviews" as any).delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else { toast.success(t("تم الحذف", "Deleted")); qc.invalidateQueries({ queryKey: ["event_reviews"] }); }
+  };
+  const avg = rows.length ? (rows.reduce((s: number, r: any) => s + r.rating, 0) / rows.length) : 0;
+
+  return (
+    <>
+      <H1>{t("تقييمات الملتقى", "Event Reviews")} ({rows.length})</H1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card className="p-5">
+          <div className="text-xs font-bold text-slate-500 uppercase">{t("المتوسط", "Average")}</div>
+          <div className="mt-2 flex items-baseline gap-2">
+            <div className="text-4xl font-black">{avg.toFixed(1)}</div>
+            <div className="text-slate-400">/ 5</div>
+          </div>
+          <div className="mt-2 flex gap-0.5">
+            {[1,2,3,4,5].map(n => (
+              <Star key={n} className={`h-4 w-4 ${n <= Math.round(avg) ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
+            ))}
+          </div>
+        </Card>
+        <Card className="p-5">
+          <div className="text-xs font-bold text-slate-500 uppercase">{t("عدد التقييمات", "Total")}</div>
+          <div className="mt-2 text-4xl font-black">{rows.length}</div>
+        </Card>
+        <Card className="p-5">
+          <div className="text-xs font-bold text-slate-500 uppercase">{t("توصيات", "Suggestions")}</div>
+          <div className="mt-2 text-4xl font-black">{rows.filter((r: any) => r.recommendation?.trim()).length}</div>
+        </Card>
+      </div>
+      <Card className="p-5">
+        <div className="grid gap-3 md:grid-cols-2">
+          {rows.map((r: any) => {
+            const role = REVIEW_ROLE_LABELS[r.role];
+            return (
+              <div key={r.id} className="rounded-xl border border-slate-200 p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-bold">{r.name}</div>
+                    <div className="text-xs text-slate-500">{role ? t(role.ar, role.en) : r.role}</div>
+                  </div>
+                  <button onClick={() => remove(r.id)} className="text-red-600"><Trash2 className="h-4 w-4" /></button>
+                </div>
+                <div className="mt-2 flex gap-0.5">
+                  {[1,2,3,4,5].map(n => (
+                    <Star key={n} className={`h-4 w-4 ${n <= r.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
+                  ))}
+                </div>
+                {r.recommendation && <p className="mt-2 text-sm text-slate-600">{r.recommendation}</p>}
+                <div className="mt-2 text-xs text-slate-400">{new Date(r.created_at).toLocaleString()}</div>
+              </div>
+            );
+          })}
+          {!rows.length && <div className="col-span-2 text-center text-slate-400 py-6">{t("لا توجد تقييمات بعد", "No reviews yet")}</div>}
+        </div>
+      </Card>
+    </>
+  );
+}
