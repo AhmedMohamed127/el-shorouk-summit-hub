@@ -5,15 +5,15 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar, Clock, MapPin, Sparkles, Brain, Briefcase, TrendingUp, Code2,
-  Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft,
+  Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft, ChevronRight,
   Linkedin, Twitter, Mail, Phone, Facebook, Instagram, Globe, Languages,
-  Building2,
+  Building2, MessageCircleQuestion, Star,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import bisLogo from "@/assets/bis-logo-v2.png.asset.json";
+import bisLogo from "@/assets/bis-logo-v3.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -687,6 +687,186 @@ function Footer() {
   );
 }
 
+function AskQuestion() {
+  const { t } = useLang();
+  const qc = useQueryClient();
+  useRealtime("event_questions");
+  const [form, setForm] = useState({ name: "", question: "", target_speaker: "" });
+  const [loading, setLoading] = useState(false);
+  const { data: questions = [] } = useQuery({
+    queryKey: ["event_questions"],
+    queryFn: async () => {
+      const { data } = await supabase.from("event_questions" as any).select("*").order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+  const speakers = useTable("speakers");
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.question.trim()) {
+      toast.error(t("الاسم والسؤال مطلوبان", "Name and question are required"));
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.from("event_questions" as any).insert(form);
+    setLoading(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(t("تم إرسال سؤالك!", "Your question has been sent!"));
+    setForm({ name: "", question: "", target_speaker: "" });
+    qc.invalidateQueries({ queryKey: ["event_questions"] });
+  };
+
+  const field = "w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20";
+
+  return (
+    <Section id="ask" className="bg-secondary/40">
+      <SectionHeader
+        eyebrow={t("اسأل الحضور", "Ask the Panel")}
+        title={t("اطرح سؤالك على المتحدثين", "Ask the speakers a question")}
+        subtitle={t("سيتم عرض الأسئلة على المتحدثين خلال الملتقى.", "Questions will be shared with speakers during the event.")}
+      />
+      <motion.form
+        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        onSubmit={submit}
+        className="mx-auto max-w-2xl space-y-4 rounded-2xl border bg-card p-8 shadow-elevated"
+      >
+        <input className={field} placeholder={t("اسمك *", "Your name *")} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+        <select className={field} value={form.target_speaker} onChange={e => setForm({ ...form, target_speaker: e.target.value })}>
+          <option value="">{t("للجميع", "To everyone")}</option>
+          {speakers.map((s: any) => (
+            <option key={s.id} value={s.name_ar || s.name_en}>{t(s.name_ar, s.name_en)}</option>
+          ))}
+        </select>
+        <textarea rows={4} className={field} placeholder={t("سؤالك *", "Your question *")} value={form.question} onChange={e => setForm({ ...form, question: e.target.value })} />
+        <button type="submit" disabled={loading} className="w-full rounded-xl bg-gradient-to-r from-gold to-gold-soft py-3.5 text-base font-bold text-navy-deep shadow-elevated transition hover:scale-[1.01] disabled:opacity-60">
+          {loading ? t("جاري الإرسال…", "Sending…") : t("أرسل السؤال", "Send Question")}
+        </button>
+      </motion.form>
+      {questions.length > 0 && (
+        <div className="mx-auto mt-10 max-w-3xl">
+          <p className="mb-4 text-sm font-bold text-navy-deep">{t(`أحدث الأسئلة (${questions.length})`, `Latest Questions (${questions.length})`)}</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {questions.slice(0, 6).map((q: any) => (
+              <div key={q.id} className="rounded-xl border bg-card p-4 text-start shadow-elevated">
+                <div className="flex items-start gap-2">
+                  <MessageCircleQuestion className="mt-1 h-4 w-4 shrink-0 text-gold" />
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground">{q.question}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">— {q.name}{q.target_speaker ? ` → ${q.target_speaker}` : ""}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </Section>
+  );
+}
+
+const REVIEW_ROLES: { value: string; ar: string; en: string }[] = [
+  { value: "student", ar: "طالب", en: "Student" },
+  { value: "doctor", ar: "دكتور", en: "Doctor" },
+  { value: "teaching_assistant", ar: "معيد", en: "Teaching Assistant" },
+  { value: "visitor", ar: "زائر", en: "Visitor" },
+];
+
+function Reviews() {
+  const { t } = useLang();
+  const qc = useQueryClient();
+  useRealtime("event_reviews");
+  const [form, setForm] = useState({ name: "", role: "", rating: 5, recommendation: "" });
+  const [loading, setLoading] = useState(false);
+  const { data: reviews = [] } = useQuery({
+    queryKey: ["event_reviews"],
+    queryFn: async () => {
+      const { data } = await supabase.from("event_reviews" as any).select("*").order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.role) {
+      toast.error(t("الاسم والدور مطلوبان", "Name and role are required"));
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.from("event_reviews" as any).insert(form);
+    setLoading(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(t("شكرًا لتقييمك!", "Thank you for your review!"));
+    setForm({ name: "", role: "", rating: 5, recommendation: "" });
+    qc.invalidateQueries({ queryKey: ["event_reviews"] });
+  };
+
+  const field = "w-full rounded-xl border border-input bg-background px-4 py-3 text-base outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/20";
+  const avg = reviews.length ? (reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length) : 0;
+
+  return (
+    <Section id="reviews" className="bg-background">
+      <SectionHeader
+        eyebrow={t("التقييمات", "Reviews")}
+        title={t("قيّم الملتقى واقترح تحسينات", "Rate the event and suggest improvements")}
+        subtitle={reviews.length ? t(`متوسط التقييم ${avg.toFixed(1)} / 5 من ${reviews.length} مشاركة`, `Average rating ${avg.toFixed(1)} / 5 from ${reviews.length} responses`) : undefined}
+      />
+      <motion.form
+        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        onSubmit={submit}
+        className="mx-auto max-w-2xl space-y-4 rounded-2xl border bg-card p-8 shadow-elevated"
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input className={field} placeholder={t("اسمك *", "Your name *")} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <select className={field} value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}>
+            <option value="">{t("أنت... *", "You are... *")}</option>
+            {REVIEW_ROLES.map(r => <option key={r.value} value={r.value}>{t(r.ar, r.en)}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center justify-center gap-2 py-2">
+          {[1, 2, 3, 4, 5].map(n => (
+            <button
+              key={n} type="button"
+              onClick={() => setForm({ ...form, rating: n })}
+              className="transition hover:scale-110"
+              aria-label={`${n} stars`}
+            >
+              <Star className={`h-9 w-9 ${n <= form.rating ? "fill-gold text-gold" : "text-muted-foreground/40"}`} />
+            </button>
+          ))}
+        </div>
+        <textarea rows={3} className={field} placeholder={t("اقترح تحسينات (اختياري)", "Suggest improvements (optional)")} value={form.recommendation} onChange={e => setForm({ ...form, recommendation: e.target.value })} />
+        <button type="submit" disabled={loading} className="w-full rounded-xl bg-gradient-to-r from-gold to-gold-soft py-3.5 text-base font-bold text-navy-deep shadow-elevated transition hover:scale-[1.01] disabled:opacity-60">
+          {loading ? t("جاري الإرسال…", "Sending…") : t("أرسل التقييم", "Submit Review")}
+        </button>
+      </motion.form>
+      {reviews.length > 0 && (
+        <div className="mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-2">
+          {reviews.slice(0, 6).map((r: any) => {
+            const role = REVIEW_ROLES.find(x => x.value === r.role);
+            return (
+              <div key={r.id} className="rounded-xl border bg-card p-4 text-start shadow-elevated">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-bold text-navy-deep">{r.name}</span>
+                  <span className="rounded-full bg-navy-deep px-2.5 py-0.5 text-xs font-semibold text-gold">
+                    {role ? t(role.ar, role.en) : r.role}
+                  </span>
+                </div>
+                <div className="mb-2 flex gap-0.5">
+                  {[1,2,3,4,5].map(n => (
+                    <Star key={n} className={`h-4 w-4 ${n <= r.rating ? "fill-gold text-gold" : "text-muted-foreground/30"}`} />
+                  ))}
+                </div>
+                {r.recommendation && <p className="text-sm text-muted-foreground">{r.recommendation}</p>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
+  );
+}
+
 function Home() {
   return (
     <div className="overflow-x-hidden bg-background">
@@ -700,6 +880,8 @@ function Home() {
       <FutureSkills />
       <Speakers />
       <RegisterForm />
+      <AskQuestion />
+      <Reviews />
       <Gallery />
       <Sponsors />
       <CTA />
