@@ -92,6 +92,57 @@ export type Database = {
         }
         Relationships: []
       }
+      event_questions: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          question: string
+          target_speaker: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          question: string
+          target_speaker?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          question?: string
+          target_speaker?: string | null
+        }
+        Relationships: []
+      }
+      event_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          rating: number
+          recommendation: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          rating: number
+          recommendation?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          rating?: number
+          recommendation?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
       gallery_images: {
         Row: {
           caption_ar: string | null
