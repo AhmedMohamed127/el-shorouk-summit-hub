@@ -5,15 +5,15 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar, Clock, MapPin, Sparkles, Brain, Briefcase, TrendingUp, Code2,
-  Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft,
+  Users, Trophy, GraduationCap, Award, MessageSquareQuote, ChevronLeft, ChevronRight,
   Linkedin, Twitter, Mail, Phone, Facebook, Instagram, Globe, Languages,
-  Building2,
+  Building2, MessageCircleQuestion, Star,
 } from "lucide-react";
 
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import heroBg from "@/assets/hero-bg.jpg";
-import bisLogo from "@/assets/bis-logo-v2.png.asset.json";
+import bisLogo from "@/assets/bis-logo-v3.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
