@@ -696,7 +696,7 @@ function AskQuestion() {
   const { data: questions = [] } = useQuery({
     queryKey: ["event_questions"],
     queryFn: async () => {
-      const { data } = await supabase.from("event_questions").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("event_questions" as any).select("*").order("created_at", { ascending: false });
       return data ?? [];
     },
   });
@@ -709,7 +709,7 @@ function AskQuestion() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("event_questions").insert(form);
+    const { error } = await supabase.from("event_questions" as any).insert(form);
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success(t("تم إرسال سؤالك!", "Your question has been sent!"));
@@ -781,7 +781,7 @@ function Reviews() {
   const { data: reviews = [] } = useQuery({
     queryKey: ["event_reviews"],
     queryFn: async () => {
-      const { data } = await supabase.from("event_reviews").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("event_reviews" as any).select("*").order("created_at", { ascending: false });
       return data ?? [];
     },
   });
@@ -793,7 +793,7 @@ function Reviews() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("event_reviews").insert(form);
+    const { error } = await supabase.from("event_reviews" as any).insert(form);
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success(t("شكرًا لتقييمك!", "Thank you for your review!"));
