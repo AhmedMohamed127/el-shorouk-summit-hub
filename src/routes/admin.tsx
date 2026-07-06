@@ -750,7 +750,12 @@ function QuestionsAdmin() {
                 <button key={r.id} onClick={() => setIdx(i)}
                   className={`text-start rounded-xl border p-3 transition ${i === idx ? "border-navy-deep bg-slate-50" : "border-slate-200 hover:border-slate-400"}`}>
                   <p className="text-sm line-clamp-2">{r.question}</p>
-                  <p className="mt-1 text-xs text-slate-500">— {r.name}{r.target_speaker ? ` → ${r.target_speaker}` : ""}</p>
+                  <p className="mt-1 text-xs text-slate-500">— {r.name}</p>
+                  {r.target_speaker && (
+                    <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-navy-deep/10 px-2 py-0.5 text-xs font-semibold text-navy-deep">
+                      {t("موجه إلى", "For")}: {r.target_speaker}
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
