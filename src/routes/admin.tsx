@@ -720,9 +720,11 @@ function QuestionsAdmin() {
                   <div>
                     <div className="text-xs uppercase tracking-widest opacity-70">{t("من", "From")}</div>
                     <div className="text-lg font-bold">{current.name}</div>
-                    {current.target_speaker && (
-                      <div className="mt-1 text-sm opacity-90">→ {current.target_speaker}</div>
-                    )}
+                    {current.target_speaker ? (
+                      <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/25 px-3 py-1 text-sm font-semibold backdrop-blur">
+                        <span className="opacity-80">{t("موجه إلى", "For")}:</span> {current.target_speaker}
+                      </div>
+                    ) : null}
                   </div>
                   <button onClick={() => remove(current.id)} className="rounded-lg bg-white/20 px-3 py-2 text-xs font-bold hover:bg-white/30 backdrop-blur">
                     <Trash2 className="h-4 w-4" />
