@@ -32,8 +32,8 @@ function useRealtime(table: string) {
   const qc = useQueryClient();
   useEffect(() => {
     const channel = supabase
-      .channel(`public-${table}`)
-      .on("postgres_changes", { event: "*", schema: "public", table }, () => {
+      .channel(`public-${table}-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes" as any, { event: "*", schema: "public", table }, () => {
         qc.invalidateQueries({ queryKey: [table] });
       })
       .subscribe();
