@@ -744,21 +744,19 @@ function AskQuestion() {
         </button>
       </motion.form>
       {questions.length > 0 && (
-        <div className="mx-auto mt-10 max-w-3xl">
-          <p className="mb-4 text-sm font-bold text-navy-deep">{t(`أحدث الأسئلة (${questions.length})`, `Latest Questions (${questions.length})`)}</p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {questions.slice(0, 6).map((q: any) => (
-              <div key={q.id} className="rounded-xl border bg-card p-4 text-start shadow-elevated">
-                <div className="flex items-start gap-2">
-                  <MessageCircleQuestion className="mt-1 h-4 w-4 shrink-0 text-gold" />
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground">{q.question}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">— {q.name}{q.target_speaker ? ` → ${q.target_speaker}` : ""}</p>
-                  </div>
+        <div className="mx-auto mt-10 max-w-2xl">
+          <p className="mb-4 text-sm font-bold text-navy-deep">{t("أحدث 10 أسئلة", "Latest 10 Questions")}</p>
+          <ul className="divide-y rounded-xl border bg-card shadow-elevated">
+            {questions.slice(0, 10).map((q: any) => (
+              <li key={q.id} className="flex items-start gap-2 p-3 text-start">
+                <MessageCircleQuestion className="mt-1 h-4 w-4 shrink-0 text-gold" />
+                <div className="flex-1">
+                  <p className="text-sm text-foreground">{q.question}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">— {q.name}{q.target_speaker ? ` → ${q.target_speaker}` : ""}</p>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </Section>
